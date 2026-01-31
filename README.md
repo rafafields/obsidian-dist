@@ -9,6 +9,7 @@ It generates a standalone website mirroring your vault's structure, converting M
 - **Style Replicaton**: Inherits your vault's accent color and custom font (via Google Fonts).
 - **Navigation Tree**: Generates a sidebar navigation matching your folder structure.
 - **Internal Links**: Preserves links between notes.
+- **Private Directories**: Enables a feature to prevent a root directory to be converted to HTML
 
 ## Based on
 This project is based on the [Obsidian Sample Plugin](https://github.com/obsidianmd/obsidian-sample-plugin).
@@ -25,6 +26,3 @@ This project is based on the [Obsidian Sample Plugin](https://github.com/obsidia
 - `npm i` or `yarn` to install dependencies.
 - `npm run dev` to start compilation in watch mode.
 - `npm run build` to build for production.
-
-## Author
-**Rafafields**
