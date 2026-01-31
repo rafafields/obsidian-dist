@@ -26,6 +26,18 @@ export class StaticSiteGenerator {
     }
 
     async generate() {
+        // Validation
+        if (!this.settings.indexFile) {
+            new Notice('Please select an Entry Point Note in settings first.');
+            return;
+        }
+
+        const indexFile = this.app.vault.getAbstractFileByPath(this.settings.indexFile);
+        if (!indexFile || !(indexFile instanceof TFile) || indexFile.extension !== 'md' || indexFile.parent?.path !== '/') {
+            new Notice('Selected Entry Point Note is invalid or not in root.');
+            return;
+        }
+
         new Notice('Starting static site generation...');
 
         // Update History
@@ -132,8 +144,17 @@ export class StaticSiteGenerator {
                     ${this.generateNavHtml(item.children || [], currentPath)}
                 </details>`;
             } else {
-                const targetPath = item.path.replace(/\.md$/, '.html');
-                const relPath = this.getRelativePath(currentPath, targetPath);
+                let targetPath = item.path.replace(/\.md$/, '.html');
+                if (item.path === this.settings.indexFile) {
+                    targetPath = 'index.html';
+                }
+
+                // Calculate relative path from current file to target file
+                // If current file is the index file, its "path" for relative calculation is effectively "index.html" (root level)
+                const effectiveCurrentPath = (currentPath === this.settings.indexFile) ? 'index.html' : currentPath;
+
+                const relPath = this.getRelativePath(effectiveCurrentPath, targetPath);
+
                 const isActive = item.path === currentPath ? 'class="active"' : '';
                 html += `<a href="${relPath}" ${isActive}>${item.name}</a>`;
             }
@@ -329,7 +350,12 @@ h1.note-title { margin-top: 0; border-bottom: 1px solid var(--background-modifie
 
     async processMarkdown(file: TFile, outputDir: string) {
         const content = await this.app.vault.read(file);
-        const destPath = path.join(outputDir, file.path.replace(/\.md$/, '.html'));
+
+        let destPath = path.join(outputDir, file.path.replace(/\.md$/, '.html'));
+        if (file.path === this.settings.indexFile) {
+            destPath = path.join(outputDir, 'index.html');
+        }
+
         const destDir = path.dirname(destPath);
         if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
 
@@ -356,8 +382,8 @@ h1.note-title { margin-top: 0; border-bottom: 1px solid var(--background-modifie
 <head>
 	<meta charset="utf-8">
 	<title>${file.basename}</title>
-	<link rel="stylesheet" href="${this.getRelativePath(file.path, 'assets/style.css')}">
-	<link rel="stylesheet" href="${this.getRelativePath(file.path, 'assets/custom.css')}">
+	<link rel="stylesheet" href="${this.getRelativePath(file.path === this.settings.indexFile ? 'index.html' : file.path, 'assets/style.css')}">
+	<link rel="stylesheet" href="${this.getRelativePath(file.path === this.settings.indexFile ? 'index.html' : file.path, 'assets/custom.css')}">
 </head>
 <body class="${document.body.className}">
     <div class="app-container">
@@ -420,10 +446,18 @@ h1.note-title { margin-top: 0; border-bottom: 1px solid var(--background-modifie
             if (linkText) {
                 const targetFile = this.app.metadataCache.getFirstLinkpathDest(linkText, sourcePath);
                 if (targetFile) {
-                    const targetPath = targetFile.extension === 'md'
+                    let targetPath = targetFile.extension === 'md'
                         ? targetFile.path.replace(/\.md$/, '.html')
                         : targetFile.path;
-                    const relPath = this.getRelativePath(sourcePath, targetPath);
+
+                    if (targetFile.path === this.settings.indexFile) {
+                        targetPath = 'index.html';
+                    }
+
+                    // If we are processing the index file, its location is effectively root 'index.html'
+                    const effectiveSourcePath = (sourcePath === this.settings.indexFile) ? 'index.html' : sourcePath;
+
+                    const relPath = this.getRelativePath(effectiveSourcePath, targetPath);
                     link.setAttribute('href', relPath);
                 }
             }
