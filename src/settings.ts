@@ -3,10 +3,16 @@ import MyPlugin from './main';
 
 export interface MyPluginSettings {
 	outputDir: string;
+	allowPrivateFolders: boolean;
+	lockedFolders: string[];
+	previousOutputDirs: string[];
 }
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
-	outputDir: 'dist'
+	outputDir: 'dist',
+	allowPrivateFolders: false,
+	lockedFolders: [],
+	previousOutputDirs: []
 }
 
 export class SampleSettingTab extends PluginSettingTab {
@@ -31,6 +37,20 @@ export class SampleSettingTab extends PluginSettingTab {
 				.onChange(async (value) => {
 					this.plugin.settings.outputDir = value;
 					await this.plugin.saveSettings();
+					this.plugin.refreshFileExplorerIcons();
+				}));
+
+
+		new Setting(containerEl)
+			.setName('Allow Private Folders')
+			.setDesc('Enable the ability to lock specific root folders from the file explorer.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.allowPrivateFolders)
+				.onChange(async (value) => {
+					this.plugin.settings.allowPrivateFolders = value;
+					await this.plugin.saveSettings();
+					// Trigger UI update in main plugin
+					this.plugin.refreshFileExplorerIcons();
 				}));
 
 		new Setting(containerEl)

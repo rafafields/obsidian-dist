@@ -1,8 +1,45 @@
-/*
+/* Lock Icon Styles */
+.nav-folder-title {
+    display: flex !important;
+    /* Ensure it is flex container */
+    align-items: center;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.obsidian-dist-lock-icon {
+    margin-left: auto;
+    /* Push to the right if flex container, or just standard margin */
+    margin-right: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
+    opacity: 0.3;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+}
 
-If your plugin does not need CSS, delete this file.
+.obsidian-dist-lock-icon:hover {
+    opacity: 0.8;
+    color: var(--text-normal);
+}
 
-*/
+.obsidian-dist-lock-icon.is-locked {
+    color: var(--interactive-accent);
+    /* Illuminated look */
+    opacity: 1;
+    filter: drop-shadow(0 0 2px var(--interactive-accent));
+}
+
+/* Ensure title container handles the icon correctly */
+.nav-folder-title-content {
+    flex-grow: 1;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Hidden container class */
+.obsidian-dist-hidden {
+    display: none !important;
+}
